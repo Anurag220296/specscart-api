@@ -9,14 +9,14 @@ exports.createProduct = async (req, res) => {
     }
 };
 
-exports.getProducts = async (req, res) => {
-    try {
-        const products = await productController.getProducts();
-        res.json(products);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
+// exports.getProducts = async (req, res) => {
+//     try {
+//         const products = await productController.getProducts();
+//         res.json(products);
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// };
 
 exports.getProductById = async (req, res) => {
     try {
@@ -60,4 +60,15 @@ exports.deleteProductByKey = async (req, res) => {
 
 exports.createBulkProducts = (req, res) => {
     productController.createBulkProducts(req, res);
+};
+
+exports.getProducts = async (req, res) => {
+  try {
+    const { page, limit } = req.query;
+    const data = await productController.getPaginatedProducts(page, limit);
+    res.json(data);
+  } catch (error) {
+    console.error("Pagination Error:", error);
+    res.status(500).json({ error: "Server Error" });
+  }
 };

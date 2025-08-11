@@ -73,3 +73,23 @@ exports.createBulkProducts = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
+exports.getPaginatedProducts = async (page, limit) => {
+  // Convert to numbers & set defaults
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // Fetch paginated products
+  const products = await Product.find().skip(skip).limit(limit);
+
+  // Total count for pagination
+  const totalProducts = await Product.countDocuments();
+
+  return {
+    totalProducts,
+    totalPages: Math.ceil(totalProducts / limit),
+    currentPage: page,
+    products,
+  };
+};
