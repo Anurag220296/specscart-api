@@ -172,6 +172,12 @@ exports.getFilteredProducts = async (query) => {
       const categoryDocs = await Category.find({
         name: { $in: categoryNames }
       }).select("_id");
+
+      const categoryIds = categoryDocs.map(cat => cat._id);
+
+      if (categoryIds.length) {
+        filter.category = { $in: categoryIds };
+      } 
     }
 
   // Filter by brand (comma-separated names)
