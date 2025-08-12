@@ -152,7 +152,7 @@ exports.getFilteredProducts = async (query) => {
 
   // Pagination defaults
   page = parseInt(page) || 1;
-  limit = parseInt(limit) || 10;
+  limit = parseInt(limit) || 8;
   const skip = (page - 1) * limit;
 
   // Build MongoDB filter object
@@ -168,8 +168,11 @@ exports.getFilteredProducts = async (query) => {
 
   // Filter by category (comma-separated IDs)
   if (category) {
-    filter.category = { $in: category.split(",") };
-  }
+      const categoryNames = category.split(",").map(name => name.trim());
+      const categoryDocs = await Category.find({
+        name: { $in: categoryNames }
+      }).select("_id");
+    }
 
   // Filter by brand (comma-separated names)
   if (brand) {
