@@ -93,3 +93,58 @@ exports.getPaginatedProducts = async (page, limit) => {
     products,
   };
 };
+
+exports.getFilteredProducts = async (query) => {
+  let { search, category, brand, price_min, price_max, sort, page, limit } = query;
+
+  // Pagination defaults
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // Build MongoDB filter
+  const filter = {};
+
+  if (search) {
+    filter.$or = [
+      { name: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } }
+    ];
+  }
+
+  if (category) {
+    filter.category = { $in: category.split(",") };
+  }
+
+  if (brand) {
+    filter.brand = { $in: brand.split(",") };
+  }
+
+  if (price_min || price_max) {
+    filter.price = {};
+    if (price_min) filter.price.$gte = Number(price_min);
+    if (price_max) filter.price.$lte = Number(price_max);
+  }
+
+  let sortObj = {};
+  if (sort) {
+    const [field, order] = sort.split("_");
+    sortObj[field] = order === "asc" ? 1 : -1;
+  }
+
+  // Query DB and populate category details
+  const products = await Product.find(filter)
+    .populate("category", "name description")
+    .sort(sortObj)
+    .skip(skip)
+    .limit(limit);
+
+  const totalProducts = await Product.countDocuments(filter);
+
+  return {
+    totalProducts,
+    totalPages: Math.ceil(totalProducts / limit),
+    currentPage: page,
+    products
+  };
+};

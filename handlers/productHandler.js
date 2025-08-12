@@ -72,3 +72,13 @@ exports.getProducts = async (req, res) => {
     res.status(500).json({ error: "Server Error" });
   }
 };
+
+exports.getFilteredProducts = async (req, res) => {
+  try {
+    const data = await productController.getFilteredProducts(req.query);
+    res.json(data);
+  } catch (error) {
+    console.error("Product API Error:", error);
+    res.status(500).json({ error: "Server Error" });
+  }
+};
